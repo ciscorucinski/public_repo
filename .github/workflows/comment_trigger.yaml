@@ -27,10 +27,10 @@ jobs:
         id: get_trigger_phrases
         run: |
           trigger_phrases=$(cat triggers.txt)
-          echo "::set-output name=trigger_phrases::$trigger_phrases"
+          echo "trigger_phrases=$trigger_phrases" >> $GITHUB_OUTPUT
           echo "Trigger Phrases: $trigger_phrases"
 
-      - name: Check for specific strings in comment
+      - name: Check for triggers in comment
         id: check_comment
         uses: actions/github-script@v7
         with:
@@ -41,7 +41,7 @@ jobs:
         env:
           TRIGGER_PHRASES: ${{ steps.get_trigger_phrases.outputs.trigger_phrases }}
 
-      - name: Delete comment if it contains any of the specific strings
+      - name: Delete comment if it contains any trigger
         if: steps.check_comment.outputs.result == 'true'
         uses: actions/github-script@v7
         with:
@@ -53,13 +53,13 @@ jobs:
               comment_id: commentId
             });
 
-      # - name: Block user if comment contains any of the specific strings
+      # - name: Block user if comment contains any trigger
       #   if: steps.check_comment.outputs.result == 'true'
       #   uses: actions/github-script@v7
       #   with:
       #     script: |
       #       const userId = context.payload.comment.user.id;
-      #       await github.users.block({
+      #       await github.rest.users.block({
       #         owner: context.repo.owner,
       #         repo: context.repo.repo,
       #         user_id: userId
