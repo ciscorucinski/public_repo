@@ -26,8 +26,11 @@ jobs:
       - name: Get trigger phrases
         id: get_trigger_phrases
         run: |
-          trigger_phrases=$(cat triggers.txt)
-          echo "triggers=$trigger_phrases" >> $GITHUB_OUTPUT
+          {
+            echo 'triggers<<EOF'
+            cat triggers.txt
+            echo EOF
+          } >> $GITHUB_OUTPUT
 
       - name: Check for triggers in comment
         id: check_comment
@@ -35,8 +38,8 @@ jobs:
         with:
           script: |
             const comment = context.payload.comment.body;
-            const triggerPhrases = `${process.env.TRIGGER_PHRASES}`.split('\n');
-            return triggerPhrases.some(triggerPhrase => comment.includes(triggerPhrase));
+            const triggers = `${process.env.TRIGGER_PHRASES}`.split('\n');
+            return triggers.some(trigger => comment.includes(trigger));
         env:
           TRIGGER_PHRASES: ${{ steps.get_trigger_phrases.outputs.triggers }}
 
