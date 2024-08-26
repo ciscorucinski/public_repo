@@ -28,8 +28,7 @@ jobs:
         run: |
           trigger_phrases=$(cat triggers.txt)
           echo "::set-output name=trigger_phrases::$trigger_phrases"
-          echo $trigger_phrases
-          echo trigger_phrases
+          echo "Trigger Phrases: $trigger_phrases"
 
       - name: Check for specific strings in comment
         id: check_comment
@@ -38,8 +37,7 @@ jobs:
           script: |
             const comment = context.payload.comment.body;
             const triggerPhrases = `${process.env.TRIGGER_PHRASES}`.split('\n');
-            echo StriggerPhrases
-            echo triggerPhrases
+            echo "Trigger Phrases: $triggerPhrases"
             return triggerPhrases.some(triggerPhrase => comment.includes(triggerPhrase));
         env:
           TRIGGER_PHRASES: ${{ steps.get_trigger_phrases.outputs.trigger_phrases }}
