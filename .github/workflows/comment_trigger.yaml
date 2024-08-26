@@ -26,7 +26,7 @@ jobs:
       - name: Get trigger phrases
         id: get_trigger_phrases
         run: |
-          trigger_phrases=$(cat private-repo/triggers.txt)
+          trigger_phrases=$(cat triggers.txt)
           echo "::set-output name=trigger_phrases::$trigger_phrases"
 
       - name: Check for specific strings in comment
