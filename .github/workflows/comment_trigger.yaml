@@ -13,14 +13,12 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Checkout private repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
-          repository: ciscorucinski/private-repo
-          token: ${{ secrets.ACCESS_TOKEN }}
-          path: private-repo
+          repository: ciscorucinski/private_repo
 
       - name: Get trigger phrases
         id: get_trigger_phrases
