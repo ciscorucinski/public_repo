@@ -1,0 +1,64 @@
+name: Analyze Comments
+
+on:
+  issue_comment:
+    types: [created]
+
+permissions:
+  issues: write
+  contents: read
+
+jobs:
+  analyze_comment:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Checkout private repository
+        uses: actions/checkout@v3
+        with:
+          repository: ciscorucinski/private-repo
+          token: ${{ secrets.ACCESS_TOKEN }}
+          path: private-repo
+
+      - name: Get trigger phrases
+        id: get_trigger_phrases
+        run: |
+          trigger_phrases=$(cat private-repo/triggers.txt)
+          echo "::set-output name=trigger_phrases::$trigger_phrases"
+
+      - name: Check for specific strings in comment
+        id: check_comment
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const comment = context.payload.comment.body;
+            const triggerPhrases = `${process.env.TRIGGER_PHRASES}`.split('\n');
+            return triggerPhrases.some(triggerPhrase => comment.includes(triggerPhrase));
+        env:
+          TRIGGER_PHRASES: ${{ steps.get_trigger_phrases.outputs.trigger_phrases }}
+
+      - name: Delete comment if it contains any of the specific strings
+        if: steps.check_comment.outputs.result == 'true'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const commentId = context.payload.comment.id;
+            await github.issues.deleteComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              comment_id: commentId
+            });
+
+      # - name: Block user if comment contains any of the specific strings
+      #   if: steps.check_comment.outputs.result == 'true'
+      #   uses: actions/github-script@v7
+      #   with:
+      #     script: |
+      #       const userId = context.payload.comment.user.id;
+      #       await github.users.block({
+      #         owner: context.repo.owner,
+      #         repo: context.repo.repo,
+      #         user_id: userId
+      #       });
