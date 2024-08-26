@@ -21,14 +21,14 @@ jobs:
       - name: Checkout private repository
         uses: actions/checkout@v4
         with:
-          repository: ciscorucinski/private_repo
+          repository: ciscorucinski/private_repo      # Private Repo location
           token: ${{ secrets.PAT }}
-          sparse-checkout: |
+          sparse-checkout: |                          # New-line deliminated file
             triggers.txt
 
-      - name: Get trigger phrases
+      - name: Get trigger phrases from private repository
         id: get_trigger_phrases
-        run: |
+        run: |                                         # Allows for multiline output
           {
             echo 'triggers<<EOF'
             cat triggers.txt
@@ -39,7 +39,7 @@ jobs:
         id: check_comment
         uses: actions/github-script@v7
         with:
-          script: |
+          script: | 
             const comment = context.payload.comment.body;
             const triggers = `${process.env.TRIGGER_PHRASES}`.split('\n');
             return triggers.some(trigger => comment.includes(trigger));
